@@ -129,7 +129,9 @@ def check_for_marks():
         if time_checked == 100:
             bot.send_message(user_id, "checked 100 time for you", parse_mode="Markdown")
             time_checked = 0
-        else time_checked += 1
+        else: time_checked += 1
+
+
 def bot_polling():
     bot.polling()
 
