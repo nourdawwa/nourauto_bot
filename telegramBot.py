@@ -104,9 +104,11 @@ def get_user_id(message):
 
 
 last_checked = 21
+time_checked = 0
 
 
 def check_for_marks():
+    global time_checked
     global last_checked
     print(last_checked)
     user_id = "903999664"
@@ -123,7 +125,11 @@ def check_for_marks():
 
         bot.send_message(user_id, table, parse_mode="Markdown")
         last_checked = new_check
-
+    else:
+        if time_checked == 100:
+            bot.send_message(user_id, "checked 100 time for you", parse_mode="Markdown")
+            time_checked = 0
+        else time_checked += 1
 def bot_polling():
     bot.polling()
 
@@ -133,4 +139,4 @@ bot_thread.start()
 
 while True:
     check_for_marks()
-    print(last_checked)
+    time.sleep(5 * 60)
