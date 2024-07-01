@@ -1,9 +1,11 @@
+import time
 from statistics import mean
 import requests
 from bs4 import BeautifulSoup
 import telebot
 from tabulate import tabulate
 import inflect
+import threading
 
 # Initialize the inflect engine
 p = inflect.engine()
@@ -12,7 +14,6 @@ p = inflect.engine()
 bot = telebot.TeleBot("6294128281:AAFVLK4FH37_m27DxtREOTK8MHtCQTc45ro")
 
 
-# Function to scrape the marks from the website
 def scrape_marks():
     url = "http://app.hama-univ.edu.sy/StdMark/Student/821080713?college=1"
     response = requests.get(url)
@@ -30,7 +31,7 @@ def scrape_marks():
     return grades_data
 
 
-# Handle the /marks command
+# Function to scrape the marks from the website
 @bot.message_handler(commands=['marks'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -44,7 +45,7 @@ def send_marks(message):
     bot.send_message(message.chat.id, table, parse_mode="Markdown")
 
 
-# Handle the /last command
+# Handle the /marks command
 @bot.message_handler(commands=['last'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -56,7 +57,7 @@ def send_marks(message):
     bot.send_message(message.chat.id, table, parse_mode="Markdown")
 
 
-# Handle the /marks command
+# Handle the /last command
 @bot.message_handler(commands=['count'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -65,7 +66,7 @@ def send_marks(message):
     bot.send_message(message.chat.id, total_marks_released, parse_mode="Markdown")
 
 
-# Handle the /check4new command
+# Handle the /marks command
 @bot.message_handler(commands=['check4new'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -84,7 +85,7 @@ def send_marks(message):
         bot.send_message(message.chat.id, "Nothing New", parse_mode="Markdown")
 
 
-# Handle the /last_mean command
+# Handle the /check4new command
 @bot.message_handler(commands=['last_mean'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -95,5 +96,41 @@ def send_marks(message):
     bot.send_message(message.chat.id, mean_grade, parse_mode="Markdown")
 
 
-# Polling method to keep the bot running
-bot.polling()
+# Handle the /last_mean command
+@bot.message_handler(commands=['myid'])
+def get_user_id(message):
+    user_id = message.from_user.id
+    bot.send_message(message.chat.id, f"Your User ID is: {user_id}")
+
+
+last_checked = 21
+
+
+def check_for_marks():
+    global last_checked
+    print(last_checked)
+    user_id = "903999664"
+    grades_data = scrape_marks()
+    new_check = len(grades_data)
+    print(new_check)
+    if new_check > last_checked:
+        text_number = p.number_to_words(new_check - last_checked)
+        text = f"there is {text_number} new grade{'s' if (new_check - last_checked) != 1 else ''}"
+        bot.send_message(user_id, text, parse_mode="Markdown")
+        cut_number = (new_check - last_checked) * -1
+        new_grades = grades_data[cut_number:]
+        table = tabulate(new_grades, tablefmt="pretty")
+
+        bot.send_message(user_id, table, parse_mode="Markdown")
+        last_checked = new_check
+
+def bot_polling():
+    bot.polling()
+
+
+bot_thread = threading.Thread(target=bot_polling)
+bot_thread.start()
+
+while True:
+    check_for_marks()
+    print(last_checked)
