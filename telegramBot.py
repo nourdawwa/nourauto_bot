@@ -7,6 +7,10 @@ from tabulate import tabulate
 import inflect
 import threading
 
+edit_massage= """
+remember to edit the new count in
+https://github.com/nourdawwa/nourauto_bot/edit/main/telegramBot.py
+"""
 # Initialize the inflect engine
 p = inflect.engine()
 
@@ -80,6 +84,7 @@ def send_marks(message):
         new_grades = grades_data[cut_number:]
         table = tabulate(new_grades, tablefmt="pretty")
         bot.send_message(message.chat.id, table, parse_mode="Markdown")
+        bot.send_message(message.chat.id, edit_massage, parse_mode="Markdown")
 
     else:
         bot.send_message(message.chat.id, "Nothing New", parse_mode="Markdown")
@@ -103,7 +108,7 @@ def get_user_id(message):
     bot.send_message(message.chat.id, f"Your User ID is: {user_id}")
 
 
-last_checked = 21
+last_checked = 22
 time_checked = 0
 
 
@@ -124,6 +129,7 @@ def check_for_marks():
         table = tabulate(new_grades, tablefmt="pretty")
 
         bot.send_message(user_id, table, parse_mode="Markdown")
+        bot.send_message(user_id, edit_massage, parse_mode="Markdown")
         last_checked = new_check
     else:
         if time_checked == 100:
