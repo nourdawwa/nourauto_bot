@@ -10,13 +10,8 @@ import inflect
 import threading
 import os
 
-edit_massage = """
-remember to edit the new count in
-https://github.com/nourdawwa/nourauto_bot/edit/main/telegramBot.py
-"""
 # Initialize the inflect engine
 p = inflect.engine()
-
 # Initialize the Telebot with your bot token
 bot = telebot.TeleBot("6294128281:AAFVLK4FH37_m27DxtREOTK8MHtCQTc45ro")
 
@@ -87,7 +82,6 @@ def send_marks(message):
 # Handle the /check4new command
 @bot.message_handler(commands=['check4new'])
 def send_marks(message):
-    global edit_massage
     grades_data = scrape_marks()
     last_count = 22
     total_marks_released = len(grades_data)
@@ -100,7 +94,6 @@ def send_marks(message):
         table = tabulate(new_grades, tablefmt="pretty")
         bot.send_message(message.chat.id, table, parse_mode="Markdown")
         write_number_to_file('lastChecked.txt', total_marks_released)
-        bot.send_message(message.chat.id, edit_massage, parse_mode="Markdown")
 
     else:
         bot.send_message(message.chat.id, "Nothing New", parse_mode="Markdown")
@@ -124,12 +117,7 @@ def get_user_id(message):
     bot.send_message(message.chat.id, f"Your User ID is: {user_id}")
 
 
-time_checked = 0
-
-
 def check_for_marks():
-    global time_checked
-    global edit_massage
     last_checked = read_number_from_file('lastChecked.txt')
     print("last checked", last_checked)
     user_id = "903999664"
@@ -142,16 +130,7 @@ def check_for_marks():
         cut_number = (new_check - last_checked) * -1
         new_grades = grades_data[cut_number:]
         table = tabulate(new_grades, tablefmt="pretty")
-
         bot.send_message(user_id, table, parse_mode="Markdown")
-        bot.send_message(user_id, edit_massage, parse_mode="Markdown")
-        last_checked = new_check
-    else:
-        if time_checked == 100:
-            bot.send_message(user_id, "checked 100 time for you", parse_mode="Markdown")
-            time_checked = 0
-        else:
-            time_checked += 1
 
 
 def bot_polling():
