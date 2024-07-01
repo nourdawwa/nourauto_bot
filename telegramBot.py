@@ -83,7 +83,7 @@ def send_marks(message):
 @bot.message_handler(commands=['check4new'])
 def send_marks(message):
     grades_data = scrape_marks()
-    last_count = 22
+    last_count = read_number_from_file('lastChecked.txt')
     total_marks_released = len(grades_data)
     if total_marks_released > last_count:
         text_number = p.number_to_words(total_marks_released - last_count)
