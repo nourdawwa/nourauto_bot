@@ -1,3 +1,5 @@
+# 6294128281:AAFVLK4FH37_m27DxtREOTK8MHtCQTc45ro
+
 import time
 from statistics import mean
 import requests
@@ -6,8 +8,9 @@ import telebot
 from tabulate import tabulate
 import inflect
 import threading
+import os
 
-edit_massage= """
+edit_massage = """
 remember to edit the new count in
 https://github.com/nourdawwa/nourauto_bot/edit/main/telegramBot.py
 """
@@ -35,21 +38,31 @@ def scrape_marks():
     return grades_data
 
 
+# Function to read the number from the file
+def read_number_from_file(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            number = int(file.read())
+        return number
+    else:
+        return None
+
+
+# Function to write the number to the file
+def write_number_to_file(file_path, number):
+    with open(file_path, 'w') as file:
+        file.write(str(number))
+
+
 # Function to scrape the marks from the website
 @bot.message_handler(commands=['marks'])
 def send_marks(message):
     grades_data = scrape_marks()
-    # message_text = ""
-    # for subject_name, grade, term in grades_data:
-    #     message_text += f"{subject_name} | {grade} | {term} \n"
-    # headers = ['Course', 'Grade', 'Semester']
-    #  headers=headers,
-
     table = tabulate(grades_data, tablefmt="pretty")
     bot.send_message(message.chat.id, table, parse_mode="Markdown")
 
 
-# Handle the /marks command
+# Handle the /last command
 @bot.message_handler(commands=['last'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -61,18 +74,20 @@ def send_marks(message):
     bot.send_message(message.chat.id, table, parse_mode="Markdown")
 
 
-# Handle the /last command
+# Handle the /count command
 @bot.message_handler(commands=['count'])
 def send_marks(message):
     grades_data = scrape_marks()
     total_marks_released = str(len(grades_data))
+    write_number_to_file('lastChecked.txt', total_marks_released)
 
     bot.send_message(message.chat.id, total_marks_released, parse_mode="Markdown")
 
 
-# Handle the /marks command
+# Handle the /check4new command
 @bot.message_handler(commands=['check4new'])
 def send_marks(message):
+    global edit_massage
     grades_data = scrape_marks()
     last_count = 22
     total_marks_released = len(grades_data)
@@ -84,13 +99,14 @@ def send_marks(message):
         new_grades = grades_data[cut_number:]
         table = tabulate(new_grades, tablefmt="pretty")
         bot.send_message(message.chat.id, table, parse_mode="Markdown")
+        write_number_to_file('lastChecked.txt', total_marks_released)
         bot.send_message(message.chat.id, edit_massage, parse_mode="Markdown")
 
     else:
         bot.send_message(message.chat.id, "Nothing New", parse_mode="Markdown")
 
 
-# Handle the /check4new command
+# Handle the /last_mean command
 @bot.message_handler(commands=['last_mean'])
 def send_marks(message):
     grades_data = scrape_marks()
@@ -101,25 +117,24 @@ def send_marks(message):
     bot.send_message(message.chat.id, mean_grade, parse_mode="Markdown")
 
 
-# Handle the /last_mean command
+# Handle the /myid command
 @bot.message_handler(commands=['myid'])
 def get_user_id(message):
     user_id = message.from_user.id
     bot.send_message(message.chat.id, f"Your User ID is: {user_id}")
 
 
-last_checked = 22
 time_checked = 0
 
 
 def check_for_marks():
     global time_checked
-    global last_checked
-    print(last_checked)
+    global edit_massage
+    last_checked = read_number_from_file('lastChecked.txt')
+    print("last checked", last_checked)
     user_id = "903999664"
     grades_data = scrape_marks()
     new_check = len(grades_data)
-    print(new_check)
     if new_check > last_checked:
         text_number = p.number_to_words(new_check - last_checked)
         text = f"there is {text_number} new grade{'s' if (new_check - last_checked) != 1 else ''}"
@@ -135,7 +150,8 @@ def check_for_marks():
         if time_checked == 100:
             bot.send_message(user_id, "checked 100 time for you", parse_mode="Markdown")
             time_checked = 0
-        else: time_checked += 1
+        else:
+            time_checked += 1
 
 
 def bot_polling():
@@ -148,3 +164,4 @@ bot_thread.start()
 while True:
     check_for_marks()
     time.sleep(5 * 60)
+
