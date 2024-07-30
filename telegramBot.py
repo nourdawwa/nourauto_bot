@@ -13,8 +13,8 @@ import os
 # Initialize the inflect engine
 p = inflect.engine()
 # Initialize the Telebot with your bot token
-token = os.getenv('TELEGRAM_BOT_TOKEN')
-bot = telebot.TeleBot(token)
+my_secret = os.getenv('TELEGRAM_BOT_TOKEN')
+bot = telebot.TeleBot(my_secret)
 
 def scrape_marks():
     url = "http://app.hama-univ.edu.sy/StdMark/Student/821080713?college=1"
