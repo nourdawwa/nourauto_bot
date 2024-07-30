@@ -87,7 +87,7 @@ def send_marks(message):
     write_number_to_file('lastChecked.txt', total_marks_released)
 
     if chat_id in allowed_chat_ids:
-    bot.send_message(message.chat.id, total_marks_released, parse_mode="Markdown")
+        bot.send_message(message.chat.id, total_marks_released, parse_mode="Markdown")
     else:
         with open('foff.mp4', 'rb') as video:
             bot.send_video(message.chat.id, video)
