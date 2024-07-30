@@ -72,7 +72,7 @@ def send_marks(message):
 
     table = tabulate(filtered_grades, tablefmt="pretty")
     if chat_id in allowed_chat_ids:
-    bot.send_message(message.chat.id, table, parse_mode="Markdown")
+        bot.send_message(message.chat.id, table, parse_mode="Markdown")
     else:
         with open('foff.mp4', 'rb') as video:
             bot.send_video(message.chat.id, video)
