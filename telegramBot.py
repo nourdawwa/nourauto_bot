@@ -13,7 +13,7 @@ import os
 # Initialize the inflect engine
 p = inflect.engine()
 # Initialize the Telebot with your bot token
-bot = telebot.TeleBot("6294128281:AAFVLK4FH37_m27DxtREOTK8MHtCQTc45ro")
+bot = telebot.TeleBot("${{ secrets.TELEGRAM_BOT_TOKEN }}")
 
 
 def scrape_marks():
