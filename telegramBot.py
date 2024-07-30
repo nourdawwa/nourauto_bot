@@ -1,5 +1,3 @@
-# 6294128281:AAFVLK4FH37_m27DxtREOTK8MHtCQTc45ro
-
 import time
 from statistics import mean
 import requests
@@ -9,12 +7,13 @@ from tabulate import tabulate
 import inflect
 import threading
 import os
-
 # Initialize the inflect engine
 p = inflect.engine()
 # Initialize the Telebot with your bot token
 my_secret = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = telebot.TeleBot(my_secret)
+
+allowed_chat_ids = [903999664, ]
 
 def scrape_marks():
     url = "http://app.hama-univ.edu.sy/StdMark/Student/821080713?college=1"
@@ -52,62 +51,87 @@ def write_number_to_file(file_path, number):
 # Function to scrape the marks from the website
 @bot.message_handler(commands=['marks'])
 def send_marks(message):
+    chat_id = message.chat.id
     grades_data = scrape_marks()
     table = tabulate(grades_data, tablefmt="pretty")
-    bot.send_message(message.chat.id, table, parse_mode="Markdown")
+    if chat_id in allowed_chat_ids:
+        bot.send_message(message.chat.id, table, parse_mode="Markdown")
+    else:
+        with open('foff.mp4', 'rb') as video:
+            bot.send_video(message.chat.id, video)
 
 
 # Handle the /last command
 @bot.message_handler(commands=['last'])
 def send_marks(message):
+    chat_id = message.chat.id
     grades_data = scrape_marks()
     last_term = grades_data[-1][2]
     # Filter the grades data to include only the grades with the same term as the last marks
     filtered_grades = [data for data in grades_data if (data[2] == last_term)]
 
     table = tabulate(filtered_grades, tablefmt="pretty")
+    if chat_id in allowed_chat_ids:
     bot.send_message(message.chat.id, table, parse_mode="Markdown")
+    else:
+        with open('foff.mp4', 'rb') as video:
+            bot.send_video(message.chat.id, video)
 
 
 # Handle the /count command
 @bot.message_handler(commands=['count'])
 def send_marks(message):
+    chat_id = message.chat.id
     grades_data = scrape_marks()
     total_marks_released = str(len(grades_data))
     write_number_to_file('lastChecked.txt', total_marks_released)
 
+    if chat_id in allowed_chat_ids:
     bot.send_message(message.chat.id, total_marks_released, parse_mode="Markdown")
-
+    else:
+        with open('foff.mp4', 'rb') as video:
+            bot.send_video(message.chat.id, video)
 
 # Handle the /check4new command
 @bot.message_handler(commands=['check4new'])
 def send_marks(message):
+    chat_id = message.chat.id
     grades_data = scrape_marks()
     last_count = read_number_from_file('lastChecked.txt')
     total_marks_released = len(grades_data)
-    if total_marks_released > last_count:
-        text_number = p.number_to_words(total_marks_released - last_count)
-        text = f"there is {text_number} new grade{'s' if (total_marks_released - last_count) != 1 else ''}"
-        bot.send_message(message.chat.id, text, parse_mode="Markdown")
-        cut_number = (total_marks_released - last_count) * -1
-        new_grades = grades_data[cut_number:]
-        table = tabulate(new_grades, tablefmt="pretty")
-        bot.send_message(message.chat.id, table, parse_mode="Markdown")
-        write_number_to_file('lastChecked.txt', total_marks_released)
 
+    if chat_id in allowed_chat_ids:
+        if total_marks_released > last_count:
+            text_number = p.number_to_words(total_marks_released - last_count)
+            text = f"there is {text_number} new grade{'s' if (total_marks_released - last_count) != 1 else ''}"
+            bot.send_message(message.chat.id, text, parse_mode="Markdown")
+            cut_number = (total_marks_released - last_count) * -1
+            new_grades = grades_data[cut_number:]
+            table = tabulate(new_grades, tablefmt="pretty")
+            bot.send_message(message.chat.id, table, parse_mode="Markdown")
+            write_number_to_file('lastChecked.txt', total_marks_released)
+        else:
+            bot.send_message(message.chat.id, "Nothing New", parse_mode="Markdown")
     else:
-        bot.send_message(message.chat.id, "Nothing New", parse_mode="Markdown")
+        with open('foff.mp4', 'rb') as video:
+            bot.send_video(message.chat.id, video)
+    
 
 
 # Handle the /last_mean command
 @bot.message_handler(commands=['last_mean'])
 def send_marks(message):
+    chat_id = message.chat.id
     grades_data = scrape_marks()
     last_term = grades_data[-1][2]
     total_marks_released = str(len(grades_data))
     filtered_grades = [float(data[1]) for data in grades_data if (data[2] == last_term) and float(data[1]) >= 60]
     mean_grade = str(round(mean(filtered_grades), 2))
-    bot.send_message(message.chat.id, mean_grade, parse_mode="Markdown")
+    if chat_id in allowed_chat_ids:
+        bot.send_message(message.chat.id, mean_grade, parse_mode="Markdown")
+    else:
+        with open('foff.mp4', 'rb') as video:
+            bot.send_video(message.chat.id, video)
 
 
 # Handle the /myid command
